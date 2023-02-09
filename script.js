@@ -25,58 +25,70 @@ function calcNormalVector(planePoint) {
     return [x1 - cameraPos[0], 0, z1 - cameraPos[2]]
 }
 
-function getK(z) {
+function getZprime(z) {
     let planePoint = getPlanePoint()
     let normVector = calcNormalVector(planePoint)
+    let a = normVector[0]
+    let b = normVector[1]
+    let c = normVector[2]
 
-    let d = (normVector[0] * planePoint[0]) + (normVector[1] * planePoint[1]) + (normVector[2] * planePoint[2])
-    let k = (d - az1 - bz2 - cz3) / (a^2 + b^2 + c^2)
+    let d = (a * planePoint[0]) + (a * planePoint[1]) + (a * planePoint[2])
+    let k = (d - a*z[0] - b*z[1] - c*z[2]) / (a*a + b*b + c*c)
+    return [z[0] + k*a, z[1] + k*b, z[2] + k*c]
 }
 
 
 
 function moveUp() {
-    movements = [[3, -4, 1], [2, 2, 2], [-2, -4, 1]]
-    for (let i = 0; i < 3; i++) {
-        for (let j = 0; j < 3; j++) {
-            triangle[i][j] += movements[i][j]
-        }
-    }
+    // movements = [[3, -4, 1], [2, 2, 2], [-2, -4, 1]]
+    // for (let i = 0; i < 3; i++) {
+    //     for (let j = 0; j < 3; j++) {
+    //         triangle[i][j] += movements[i][j]
+    //     }
+    // }
+    cameraPos[0] += 4
+    cameraPos[2] += 4
+    camAngle += 7
 }
 
 function moveBack() {
-    movements = [[-3, 4, -1], [-2, -2, -2], [2, 4, -1]]
-    for (let i = 0; i < 3; i++) {
-        for (let j = 0; j < 3; j++) {
-            triangle[i][j] += movements[i][j]
-        }
-    }
+    // movements = [[-3, 4, -1], [-2, -2, -2], [2, 4, -1]]
+    // for (let i = 0; i < 3; i++) {
+    //     for (let j = 0; j < 3; j++) {
+    //         triangle[i][j] += movements[i][j]
+    //     }
+    // }
+    cameraPos[0] -= 4
+    cameraPos[2] -= 4
+    camAngle -= 7
 }
 
-function drawTriangleBadly() {
+function drawTriangle() {
     ctx.fillStyle = "#FF70AB"
     ctx.fillRect(0, 0, 256, 256)
 
+    projectedTriangle = [getZprime(triangle[0]), getZprime(triangle[1]), getZprime(triangle[2])]
+
     ctx.fillStyle = "#FFFFFF"
     ctx.beginPath()
-    ctx.moveTo(triangle[0][0], triangle[0][1])
-    ctx.lineTo(triangle[1][0], triangle[1][1])
+    ctx.moveTo(projectedTriangle[0][0], projectedTriangle[0][1])
+    ctx.lineTo(projectedTriangle[1][0], projectedTriangle[1][1])
     ctx.stroke()
-    ctx.lineTo(triangle[2][0], triangle[2][1])
+    ctx.lineTo(projectedTriangle[2][0], projectedTriangle[2][1])
     ctx.stroke()
-    ctx.lineTo(triangle[0][0], triangle[0][1])
+    ctx.lineTo(projectedTriangle[0][0], projectedTriangle[0][1])
     ctx.stroke()
 }
 
-// setInterval(() => {
-//     if (animCount < 10) {
-//         moveUp()
-//         animCount++
-//     } else if (animCount < 20) {
-//         moveBack()
-//         animCount++
-//     } else {
-//         animCount = 0
-//     }
-//     drawTriangleBadly()
-// }, 50)
+setInterval(() => {
+    if (animCount < 10) {
+        moveUp()
+        animCount++
+    } else if (animCount < 20) {
+        moveBack()
+        animCount++
+    } else {
+        animCount = 0
+    }
+    drawTriangle()
+}, 50)
